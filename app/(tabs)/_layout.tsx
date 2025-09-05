@@ -44,6 +44,8 @@ export default function TabLayout() {
         options={{
           title: 'Showcase',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="square.stack.3d.up.fill" color={color} />,
+
+
         }}
       />
     </Tabs>
