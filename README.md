@@ -1,4 +1,4 @@
-<img src="screenshots/unnamed.png" alt="Logo" width="200"/>
+<img src="screenshots/unnamed.png" alt="Logo" width="200"/> <img src="screenshots/Screenshot_20250905_144402.png" alt="Logo" width="200"/>
 
 # Welcome to your Expo app 👋
 
