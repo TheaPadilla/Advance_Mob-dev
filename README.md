@@ -1,5 +1,9 @@
 <img src="screenshots/unnamed.png" alt="Logo" width="200"/>  <img src="screenshots/543337794_1666437547363727_1235537048509076997_n.jpg" alt="Logo" width="205"/> 
 <img src="screenshots/Screenshot_20250905_144402.png" alt="Logo" width="200"/>
+<img src="screenshots/Screenshot_20250905_144503.png" alt="Logo" width="200"/>
+<img src="screenshots/Screenshot_20250905_144517.png" alt="Logo" width="200"/>
+<img src="screenshots/Screenshot_20250905_144526.png" alt="Logo" width="200"/>
+<img src="screenshots/Screenshot_20250905_144532.png" alt="Logo" width="200"/>
 
 # Welcome to your Expo app 👋
 
