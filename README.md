@@ -1,4 +1,4 @@
-![Screenshot](screenshots/unnamed.png)
+<img src="screenshots/unnamed.png" alt="Logo" width="200"/>
 
 # Welcome to your Expo app 👋
 
