@@ -1,4 +1,4 @@
-![Screenshot](images/unnamed.png)
+![Screenshot](screenshots/unnamed.png)
 
 # Welcome to your Expo app 👋
 
