@@ -9,6 +9,38 @@ import Settings from "./Settings";
 import Playlists from "./Playlist";
 
 const Drawer = createDrawerNavigator();
+//added
+export const SlideTransition = {
+  transitionSpec: {
+    open: { animation: 'timing', config: { duration: 300 } },
+    close: { animation: 'timing', config: { duration: 300 } },
+  },
+  cardStyleInterpolator: ({ current, layouts }) => ({
+    cardStyle: {
+      transform: [
+        {
+          translateX: current.progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [layouts.screen.width, 0],
+          }),
+        },
+      ],
+    },
+  }),
+};
+
+export const FadeTransition = {
+  transitionSpec: {
+    open: { animation: 'timing', config: { duration: 200 } },
+    close: { animation: 'timing', config: { duration: 200 } },
+  },
+  cardStyleInterpolator: ({ current }) => ({
+    cardStyle: {
+      opacity: current.progress,
+    },
+  }),
+};
+//till here
 
 function CustomDrawerContent(props: any) {
   return (
@@ -49,6 +81,12 @@ export default function DrawerLayout() {
         drawerType: dimensions.width >= 768 ? "permanent" : "slide",
         overlayColor: "rgba(0,0,0,0.6)",
         drawerHideStatusBarOnOpen: true,
+        //dis one
+        swipeEnabled: true,
+        gestureEnabled: true,
+        gestureResponseDistance: { horizontal: 20 }, // sensitivity (20px)
+        swipeEdgeWidth: 50, // distance from edge to trigger swipe
+        //till here
       }}
     >
       <Drawer.Screen name="Profile" component={Profile} />
