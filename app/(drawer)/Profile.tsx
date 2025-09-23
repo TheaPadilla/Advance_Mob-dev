@@ -1,83 +1,337 @@
-import React from "react";
-import {router} from "expo-router";
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Spotify-like icons
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation } from "@react-navigation/native";
+import { FontAwesome } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+  FadeIn,
+} from "react-native-reanimated";
+
+const genres = ["Pop", "Rock", "Jazz", "Classical", "Hip-Hop", "Japanese"];
+const defaultAvatar = require("../../assets/images/augusta.jpg");
 
 export default function ProfileScreen() {
+  const navigation = useNavigation();
+
+  // profile data
+  const [profileUsername, setProfileUsername] = useState("Augusta");
+  const [profileEmail, setProfileEmail] = useState("augusta@mail.com");
+  const [profileGenre, setProfileGenre] = useState("Hip-Hop");
+  const [avatar, setAvatar] = useState<any>(defaultAvatar);
+
+  // form data
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [genre, setGenre] = useState("");
+  const [errors, setErrors] = useState<{ username?: string; email?: string; genre?: string }>({});
+  const [success, setSuccess] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  // animations
+  const fadeIn = useSharedValue(0);
+  const shakeXUsername = useSharedValue(0);
+  const shakeXEmail = useSharedValue(0);
+
+  useEffect(() => {
+    fadeIn.value = withTiming(1, { duration: 600 });
+    loadCache();
+  }, []);
+
+  const animatedProfileStyle = useAnimatedStyle(() => ({
+    opacity: fadeIn.value,
+  }));
+
+  const shakeStyleUsername = useAnimatedStyle(() => ({
+    transform: [{ translateX: shakeXUsername.value }],
+  }));
+
+  const shakeStyleEmail = useAnimatedStyle(() => ({
+    transform: [{ translateX: shakeXEmail.value }],
+  }));
+
+  const triggerShake = (field: "username" | "email") => {
+    const target = field === "username" ? shakeXUsername : shakeXEmail;
+    target.value = withSequence(
+      withTiming(-10, { duration: 80 }),
+      withTiming(10, { duration: 80 }),
+      withTiming(-6, { duration: 60 }),
+      withTiming(0, { duration: 60 })
+    );
+  };
+
+  // validation (no shake here!)
+  const validate = useCallback((field: string, value: string) => {
+    let error = "";
+    if (field === "username") {
+      if (!/^[a-zA-Z0-9_ ]{8,20}$/.test(value)) {
+        error = "Username must be 8–20 characters (letters, numbers, underscores).";
+      }
+    }
+    if (field === "email") {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        error = "Enter a valid email.";
+      }
+    }
+    if (field === "genre") {
+      if (!genres.includes(value)) {
+        error = "Select a valid genre.";
+      }
+    }
+    setErrors((prev) => ({ ...prev, [field]: error }));
+  }, []);
+
+  // cache
+  const saveCache = async (data: any) => {
+    try {
+      await AsyncStorage.setItem("profile", JSON.stringify(data));
+    } catch (e) {
+      console.log("Cache save error", e);
+    }
+  };
+
+  const loadCache = async () => {
+    try {
+      const cache = await AsyncStorage.getItem("profile");
+      if (cache) {
+        const data = JSON.parse(cache);
+        setProfileUsername(data.username || "Your Name");
+        setProfileEmail(data.email || "your@email.com");
+        setProfileGenre(data.genre || "Not selected");
+        setAvatar(data.avatar || defaultAvatar);
+      }
+    } catch (e) {
+      console.log("Cache load error", e);
+    }
+  };
+
+  const handleSubmit = async () => {
+    setSubmitted(true);
+
+    validate("username", username);
+    validate("email", email);
+    validate("genre", genre);
+
+    // trigger shake ONLY after submit if errors exist
+    if (errors.username) triggerShake("username");
+    if (errors.email) triggerShake("email");
+
+    if (!errors.username && !errors.email && !errors.genre) {
+      setProfileUsername(username);
+      setProfileEmail(email);
+      setProfileGenre(genre);
+
+      const newData = { username, email, genre, avatar };
+      await saveCache(newData);
+
+      setSuccess("Profile updated successfully!");
+
+      setUsername("");
+      setEmail("");
+      setGenre("");
+      setErrors({});
+      setSubmitted(false);
+
+      setTimeout(() => setSuccess(""), 3000);
+    }
+  };
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setAvatar({ uri: result.assets[0].uri });
+    }
+  };
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Ionicons name="person-circle" size={28} color="#1DB954" />
+      <View style={styles.headerRow}>
+        <TouchableOpacity onPress={() => navigation.openDrawer()}>
+          <FontAwesome name="bars" size={28} color="#1DB954" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
       </View>
 
-      {/* Profile Picture */}
-      <Image
-        source={{
-          uri: "data:image/jpeg;base64,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", // Placeholder pic
-        }}
-        style={styles.profilePic}
-      />
+      {/* Dynamic Profile */}
+      <Animated.View style={[animatedProfileStyle]}>
+        <LinearGradient colors={["#2a2a2a", "#121212"]} style={styles.header}>
+          <TouchableOpacity onPress={pickImage}>
+            <Image source={avatar} style={styles.avatar} />
+          </TouchableOpacity>
+          <View style={{ alignItems: "center" }}>
+            <Text style={styles.name}>{profileUsername || "Your Name"}</Text>
+            <Text style={styles.email}>{profileEmail || "your@email.com"}</Text>
+            <Text style={styles.genre}>
+              Favorite genre: {profileGenre || "Not selected"}
+            </Text>
+          </View>
+        </LinearGradient>
+      </Animated.View>
 
-      {/* User Info */}
-      <Text style={styles.name}>Augusta</Text>
-      <Text style={styles.email}>augusta46@example.com</Text>
+      {/* Form */}
+      <View style={styles.form}>
+        {/* Username */}
+        <Animated.View style={[shakeStyleUsername]}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter username"
+            placeholderTextColor="#888"
+            value={username}
+            onChangeText={(text) => {
+              setUsername(text);
+              validate("username", text);
+            }}
+          />
+        </Animated.View>
+        {errors.username ? (
+          <Animated.Text entering={FadeIn} style={styles.error}>
+            {errors.username}
+          </Animated.Text>
+        ) : null}
 
-      {/* Edit Button */}
-      <TouchableOpacity style={styles.editButton} onPress={() => router.replace("/Settings")}>
-        <Text style={styles.editText}>Edit Profile</Text>
-      </TouchableOpacity>
-    </View>
+        {/* Email */}
+        <Animated.View style={[shakeStyleEmail]}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter email"
+            placeholderTextColor="#888"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              validate("email", text);
+            }}
+          />
+        </Animated.View>
+        {errors.email ? (
+          <Animated.Text entering={FadeIn} style={styles.error}>
+            {errors.email}
+          </Animated.Text>
+        ) : null}
+
+        {/* Genre */}
+        <View style={styles.genreRow}>
+          {genres.map((g) => (
+            <TouchableOpacity
+              key={g}
+              style={[styles.genreOption, genre === g && styles.genreSelected]}
+              onPress={() => {
+                setGenre(g);
+                validate("genre", g);
+              }}
+            >
+              <Text
+                style={[
+                  styles.genreText,
+                  genre === g && styles.genreTextSelected,
+                ]}
+              >
+                {g}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        {errors.genre ? (
+          <Animated.Text entering={FadeIn} style={styles.error}>
+            {errors.genre}
+          </Animated.Text>
+        ) : null}
+
+        {/* Submit */}
+        <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+          <Text style={styles.submitText}>Submit</Text>
+        </TouchableOpacity>
+
+        {success ? (
+          <Animated.Text
+            entering={FadeIn}
+            style={{ color: "lime", fontSize: 14, marginTop: 8 }}
+          >
+            {success}
+          </Animated.Text>
+        ) : null}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#121212",
-    alignItems: "center",
-    paddingTop: 60,
-  },
-  header: {
-    position: "absolute",
-    top: 20,
-    left: 20,
+  container: { flex: 1, backgroundColor: "#121212" },
+  headerRow: {
     flexDirection: "row",
     alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
   },
-  headerTitle: {
+  headerTitle: { color: "#fff", fontSize: 20, fontWeight: "bold", marginLeft: 15 },
+  header: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 40,
+    paddingBottom: 40,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  avatar: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    marginBottom: 15,
+    borderWidth: 3,
+    borderColor: "#1DB954",
+  },
+  name: { color: "#fff", fontSize: 26, fontWeight: "bold" },
+  email: { color: "#bbb", fontSize: 14, marginTop: 4 },
+  genre: { color: "#bbb", fontSize: 14, marginTop: 2 },
+  form: { paddingHorizontal: 20, marginTop: 20 },
+  input: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
     color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 8,
   },
-  profilePic: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 20,
-    marginTop: 40,
+  error: { color: "red", fontSize: 13, marginBottom: 6 },
+  genreRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginVertical: 10,
   },
-  name: {
-    color: "#fff",
-    fontSize: 22,
-    fontWeight: "bold",
+  genreOption: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    backgroundColor: "#1e1e1e",
+    borderRadius: 20,
+    margin: 5,
   },
-  email: {
-    color: "#aaa",
-    fontSize: 14,
-    marginBottom: 30,
-  },
-  editButton: {
+  genreSelected: { backgroundColor: "#1DB954" },
+  genreText: { color: "#fff" },
+  genreTextSelected: { color: "#000", fontWeight: "bold" },
+  submitBtn: {
     backgroundColor: "#1DB954",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
+    padding: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
   },
-  editText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  submitText: { color: "#000", fontWeight: "bold" },
 });

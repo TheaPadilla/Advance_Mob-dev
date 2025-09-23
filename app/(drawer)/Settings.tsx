@@ -1,95 +1,53 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View, Switch, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { View, Text, StyleSheet, Switch, TouchableOpacity } from "react-native";
+import { useState } from "react";
+import { useRouter } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function SettingsScreen() {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
+  const router = useRouter();
+  const [notifications, setNotifications] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Ionicons name="settings" size={28} color="#1DB954" />
-        <Text style={styles.headerTitle}>Settings</Text>
-      </View>
-
-      {/* Notification Toggle */}
-      <View style={styles.settingRow}>
-        <Text style={styles.settingText}>Notifications</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", padding: 15 }}>
+            <TouchableOpacity onPress={() => navigation.openDrawer()}>
+              <FontAwesome name="bars" size={30} color="#1DB954" />
+            </TouchableOpacity>
+            <Text style={{ color: "#fff", fontSize: 20, marginLeft: 15 }}>Settings</Text>
+          </View>
+      <View style={styles.setting}>
+        <Text style={styles.text}>Enable Notifications</Text>
         <Switch
-          value={notificationsEnabled}
-          onValueChange={setNotificationsEnabled}
-          thumbColor={notificationsEnabled ? "#1DB954" : "#aaa"}
-          trackColor={{ false: "#555", true: "#1DB954" }}
+          value={notifications}
+          onValueChange={setNotifications}
+          thumbColor={notifications ? "#1DB954" : "#888"}
         />
       </View>
-
-      {/* Dark Mode Toggle */}
-      <View style={styles.settingRow}>
-        <Text style={styles.settingText}>Dark Mode</Text>
+      <View style={styles.setting}>
+        <Text style={styles.text}>Dark Mode</Text>
         <Switch
-          value={darkModeEnabled}
-          onValueChange={setDarkModeEnabled}
-          thumbColor={darkModeEnabled ? "#1DB954" : "#aaa"}
-          trackColor={{ false: "#555", true: "#1DB954" }}
+          value={darkMode}
+          onValueChange={setDarkMode}
+          thumbColor={darkMode ? "#1DB954" : "#888"}
         />
       </View>
-
-      {/* Logout Button */}
       <TouchableOpacity
-        style={styles.logoutButton}
-        onPress={() => router.replace("/SignIn")}
+        style={styles.logout}
+        onPress={() => router.replace("/LoginScreen")}
       >
-        <Text style={styles.logoutText}>Log Out</Text>
+        <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#121212",
-    paddingTop: 60,
-    paddingHorizontal: 20,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 8,
-  },
-  settingRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#1e1e1e",
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    marginBottom: 15,
-  },
-  settingText: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  logoutButton: {
-    marginTop: 40,
-    backgroundColor: "#1DB954",
-    paddingVertical: 14,
-    borderRadius: 25,
-    alignItems: "center",
-  },
-  logoutText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  container: { flex: 1, backgroundColor: "#121212", padding: 20 },
+  setting: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
+  text: { color: "#fff", fontSize: 16 },
+  logout: { marginTop: 30, padding: 15, backgroundColor: "#1DB954", borderRadius: 10 },
+  logoutText: { textAlign: "center", fontWeight: "bold", color: "#000" },
 });

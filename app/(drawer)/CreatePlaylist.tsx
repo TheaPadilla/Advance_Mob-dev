@@ -15,25 +15,25 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Swipeable } from "react-native-gesture-handler";
 
 const goodMorning = [
-  { id: "1", title: "Daily Mix 2", image: "https://picsum.photos/200/200?random=20" },
-  { id: "2", title: "Blink Twice", image: "https://picsum.photos/200/200?random=2" },
+  { id: "1", title: "Today's Top Hits", image: "https://picsum.photos/200/200?random=1" },
+  { id: "2", title: "Dope Labs", image: "https://picsum.photos/200/200?random=2" },
 ];
 
 const recent = [
-  { id: "3", title: "God’s Menu", subtitle: "Stray Kids", image: "https://picsum.photos/200/200?random=89" },
-  { id: "4", title: "Black Magic", subtitle: "Little Mix", image: "https://picsum.photos/200/200?random=60" },
-  { id: "5", title: "The One That Got Away", subtitle: "Katy Perry", image: "https://picsum.photos/200/200?random=68" },
+  { id: "3", title: "God’s Menu", subtitle: "Stray Kids", image: "https://picsum.photos/200/200?random=5" },
+  { id: "4", title: "Black Magic", subtitle: "Little Mix", image: "https://picsum.photos/200/200?random=6" },
+  { id: "5", title: "The One That Got Away", subtitle: "Katy Perry", image: "https://picsum.photos/200/200?random=7" },
 ];
 
 const madeForYou = [
-  { id: "6", title: "On Repeat", subtitle: "Songs you can’t get enough of", image: "https://picsum.photos/200/200?random=80" },
-  { id: "7", title: "Your Discover Weekly", subtitle: "Your weekly mixtape", image: "https://picsum.photos/200/200?random=92" },
+  { id: "6", title: "On Repeat", subtitle: "Songs you can’t get enough of", image: "https://picsum.photos/200/200?random=8" },
+  { id: "7", title: "Your Discover Weekly", subtitle: "Your weekly mixtape", image: "https://picsum.photos/200/200?random=9" },
 ];
 
 const popular = [
-  { id: "8", title: "Feelin' Good", image: "https://picsum.photos/200/200?random=103" },
-  { id: "9", title: "Oldies", image: "https://picsum.photos/200/200?random=141" },
-  { id: "10", title: "Chill Mix", image: "https://picsum.photos/200/200?random=612" },
+  { id: "8", title: "Feelin' Good", image: "https://picsum.photos/200/200?random=10" },
+  { id: "9", title: "Pumped Pop", image: "https://picsum.photos/200/200?random=11" },
+  { id: "10", title: "Chill Mix", image: "https://picsum.photos/200/200?random=12" },
 ];
 
 export default function PlaylistsScreen() {
@@ -43,7 +43,7 @@ export default function PlaylistsScreen() {
 
   useEffect(() => {
     const loadPlaylists = async () => {
-      const stored = await AsyncStorage.getItem("playlists");
+      const stored = await AsyncStorage.getItem("createplaylist");
       if (stored) setPlaylists(JSON.parse(stored));
     };
     loadPlaylists();
@@ -77,78 +77,43 @@ export default function PlaylistsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-          <FontAwesome name="bars" size={20} color="#1DB954" />
+
+
+      {/* Your Playlists Section */}
+      <Text style={styles.sectionTitle}>Your Playlists</Text>
+      <View style={styles.playlistInputRow}>
+        <TextInput
+          style={styles.input}
+          placeholder="New playlist name"
+          placeholderTextColor="#888"
+          value={newPlaylist}
+          onChangeText={setNewPlaylist}
+        />
+        <TouchableOpacity style={styles.addButton} onPress={addPlaylist}>
+          <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Good morning</Text>
       </View>
 
-      {/* Good Morning Section */}
-      <View style={styles.grid}>
-        {goodMorning.map((item) => (
-          <TouchableOpacity key={item.id} style={styles.gridItem}>
-            <Image source={{ uri: item.image }} style={styles.gridImage} />
-            <Text style={styles.gridText}>{item.title}</Text>
+      {playlists.map((playlist) => (
+        <Swipeable
+          key={playlist.id}
+          renderRightActions={() => renderRightActions(playlist.id)}
+          overshootRight={false}
+        >
+          <TouchableOpacity
+            style={styles.playlistCard}
+            onPress={() =>
+              navigation.navigate(
+                "PlaylistDetail" as never,
+                { playlistId: playlist.id, playlistName: playlist.name } as never
+              )
+            }
+          >
+            <Image source={{ uri: playlist.image }} style={styles.playlistImage} />
+            <Text style={styles.playlistName}>{playlist.name}</Text>
           </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Recent Section */}
-      <Text style={styles.sectionTitle}>Your recent rotation</Text>
-      <FlatList
-        data={recent}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.listItem}>
-            <Image source={{ uri: item.image }} style={styles.listImage} />
-            <View style={styles.listTextContainer}>
-              <Text style={styles.listTitle}>{item.title}</Text>
-              <Text style={styles.listSubtitle}>{item.subtitle}</Text>
-            </View>
-            <TouchableOpacity>
-              <FontAwesome name="ellipsis-v" size={18} color="#aaa" />
-            </TouchableOpacity>
-          </View>
-        )}
-        scrollEnabled={false}
-      />
-
-      {/* Made For You Section */}
-      <Text style={styles.sectionTitle}>Made For You</Text>
-      <FlatList
-        horizontal
-        data={madeForYou}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image source={{ uri: item.image }} style={styles.cardImage} />
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
-          </View>
-        )}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingRight: 20 }}
-      />
-
-      {/* Popular Section */}
-      <Text style={styles.sectionTitle}>Popular playlists</Text>
-      <FlatList
-        horizontal
-        data={popular}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image source={{ uri: item.image }} style={styles.cardImage} />
-            <Text style={styles.cardTitle}>{item.title}</Text>
-          </View>
-        )}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingRight: 20 }}
-      />
-
-
+        </Swipeable>
+      ))}
     </ScrollView>
   );
 }

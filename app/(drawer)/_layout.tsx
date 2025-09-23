@@ -1,97 +1,224 @@
-import React from "react";
-import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
-import { Ionicons } from "@expo/vector-icons";
-import Animated from "react-native-reanimated";
-import { useWindowDimensions } from "react-native";
+import {
+  createDrawerNavigator,
+  DrawerContentScrollView,
+  DrawerItem,
+} from "@react-navigation/drawer";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
+import { FontAwesome } from "@expo/vector-icons";
+import { View, Text, StyleSheet, Image } from "react-native";
 
-import Profile from "./Profile";
-import Settings from "./Settings";
-import Playlists from "./Playlist";
-
+// Screens
+import PlaylistsScreen from "./Playlist"; // 👉 this will now be "Home"
+import PlaylistDetailScreen from "./PlaylistDetail";
+import ProfileScreen from "./Profile";
+import SettingsScreen from "./Settings";
+import CreatePlaylistScreen from "./CreatePlaylist";
 const Drawer = createDrawerNavigator();
-//added
-export const SlideTransition = {
-  transitionSpec: {
-    open: { animation: 'timing', config: { duration: 300 } },
-    close: { animation: 'timing', config: { duration: 300 } },
-  },
-  cardStyleInterpolator: ({ current, layouts }) => ({
-    cardStyle: {
-      transform: [
-        {
-          translateX: current.progress.interpolate({
-            inputRange: [0, 1],
-            outputRange: [layouts.screen.width, 0],
-          }),
-        },
-      ],
-    },
-  }),
-};
+const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
-export const FadeTransition = {
-  transitionSpec: {
-    open: { animation: 'timing', config: { duration: 200 } },
-    close: { animation: 'timing', config: { duration: 200 } },
-  },
-  cardStyleInterpolator: ({ current }) => ({
-    cardStyle: {
-      opacity: current.progress,
-    },
-  }),
-};
-//till here
+// 👉 Home stack (was Playlists)
+function HomeStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="HomeScreen"
+        component={PlaylistsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="PlaylistDetail"
+        component={PlaylistDetailScreen}
+        options={({ route }) => ({
+          title: route.params?.playlistName || "Playlist",
+          headerStyle: { backgroundColor: "#000" },
+          headerTintColor: "#fff",
+        })}
+      />
+    </Stack.Navigator>
+  );
+}
+
+// 👉 New Playlist stack (for creating playlists)
+// 👉 New Playlist stack (for creating playlists)
+function PlaylistStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="CreatePlaylist"
+        component={CreatePlaylistScreen}
+        options={{
+          title: "Create Playlist",
+          headerStyle: { backgroundColor: "#000" },
+          headerTintColor: "#fff",
+        }}
+      />
+      <Stack.Screen
+        name="PlaylistDetail"
+        component={PlaylistDetailScreen}
+        options={({ route }) => ({
+          title: route.params?.playlistName || "Playlist",
+          headerStyle: { backgroundColor: "#000" },
+          headerTintColor: "#fff",
+        })}
+      />
+    </Stack.Navigator>
+  );
+}
+
+
+function TabsLayout() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: "#000" },
+        headerTintColor: "#fff",
+        tabBarStyle: { backgroundColor: "#121212" },
+        tabBarActiveTintColor: "#1DB954",
+        tabBarInactiveTintColor: "#fff",
+        headerShown: true,
+      }}
+    >
+      {/* Home */}
+      <Tab.Screen
+        name="Home"
+        component={HomeStack}
+        options={{
+          title: "Home",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="home" size={size} color={color} />
+          ),
+        }}
+      />
+
+      {/* Playlist (new) */}
+      <Tab.Screen
+        name="Playlist"
+        component={PlaylistStack}
+        options={{
+          title: "Playlist",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="music" size={size} color={color} />
+          ),
+        }}
+      />
+
+      {/* Profile */}
+      <Tab.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{
+          headerShown: false,
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="user" size={size} color={color} />
+          ),
+        }}
+      />
+
+      {/* Settings */}
+      <Tab.Screen
+        name="SettingsScreen"
+        component={SettingsScreen}
+        options={{
+          headerShown: false,
+          title: "Settings",
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="cog" size={size} color={color} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
 
 function CustomDrawerContent(props: any) {
   return (
     <DrawerContentScrollView {...props} style={{ backgroundColor: "#121212" }}>
+      <View style={styles.drawerHeader}>
+        <Image
+          source={require("@/assets/images/augusta.jpg")}
+          style={styles.profilePic}
+        />
+        <Text style={styles.drawerTitle}>Augusta</Text>
+      </View>
+
+      <DrawerItem
+        label="Home"
+        labelStyle={styles.drawerLabel}
+        icon={({ size }) => (
+          <FontAwesome name="home" size={size} color="#1DB954" />
+        )}
+        onPress={() => props.navigation.navigate("Tabs", { screen: "Home" })}
+      />
+      <DrawerItem
+        label="Playlist"
+        labelStyle={styles.drawerLabel}
+        icon={({ size }) => (
+          <FontAwesome name="music" size={size} color="#1DB954" />
+        )}
+        onPress={() => props.navigation.navigate("Tabs", { screen: "Playlist" })}
+      />
       <DrawerItem
         label="Profile"
-        labelStyle={{ color: "white" }}
-        icon={({ size }) => <Ionicons name="person-circle-outline" size={size} color="#1DB954" />}
-        onPress={() => props.navigation.navigate("Profile")}
+        labelStyle={styles.drawerLabel}
+        icon={({ size }) => (
+          <FontAwesome name="user" size={size} color="#1DB954" />
+        )}
+        onPress={() =>
+          props.navigation.navigate("Tabs", { screen: "ProfileScreen" })
+        }
       />
       <DrawerItem
         label="Settings"
-        labelStyle={{ color: "white" }}
-        icon={({ size }) => <Ionicons name="settings-outline" size={size} color="#1DB954" />}
-        onPress={() => props.navigation.navigate("Settings")}
-      />
-      <DrawerItem
-        label="Playlists"
-        labelStyle={{ color: "white" }}
-        icon={({ size }) => <Ionicons name="musical-notes-outline" size={size} color="#1DB954" />}
-        onPress={() => props.navigation.navigate("Playlists")}
+        labelStyle={styles.drawerLabel}
+        icon={({ size }) => (
+          <FontAwesome name="cog" size={size} color="#1DB954" />
+        )}
+        onPress={() =>
+          props.navigation.navigate("Tabs", { screen: "SettingsScreen" })
+        }
       />
     </DrawerContentScrollView>
   );
 }
 
 export default function DrawerLayout() {
-  const dimensions = useWindowDimensions();
-
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
-        headerStyle: { backgroundColor: "#121212" },
-        headerTintColor: "#fff",
-        drawerStyle: { backgroundColor: "#121212", width: 240 },
-        sceneContainerStyle: { backgroundColor: "#121212" },
-        drawerType: dimensions.width >= 768 ? "permanent" : "slide",
-        overlayColor: "rgba(0,0,0,0.6)",
-        drawerHideStatusBarOnOpen: true,
-        //dis one
+        headerShown: false,
+        drawerType: "front",
+        overlayColor: "rgba(0,0,0,0.5)",
+        sceneContainerStyle: { backgroundColor: "#000" },
+        drawerStyle: { width: "70%", backgroundColor: "#121212" },
         swipeEnabled: true,
-        gestureEnabled: true,
-        gestureResponseDistance: { horizontal: 20 }, // sensitivity (20px)
-        swipeEdgeWidth: 50, // distance from edge to trigger swipe
-        //till here
       }}
     >
-      <Drawer.Screen name="Profile" component={Profile} />
-      <Drawer.Screen name="Settings" component={Settings} />
-      <Drawer.Screen name="Playlists" component={Playlists} />
+      <Drawer.Screen name="Tabs" component={TabsLayout} />
     </Drawer.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  drawerHeader: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#333",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  profilePic: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  drawerTitle: { color: "#fff", fontSize: 20, fontWeight: "bold" },
+  drawerLabel: { color: "#fff", fontSize: 16 },
+});
