@@ -7,29 +7,25 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
-  TextInput,
 } from "react-native";
-import { useNavigation, DrawerActions } from "@react-navigation/native";
+import { useNavigation, DrawerActions, useTheme } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Swipeable } from "react-native-gesture-handler";
+import { useSelector } from "react-redux";
 
 const goodMorning = [
   { id: "1", title: "Daily Mix 2", image: "https://picsum.photos/200/200?random=20" },
   { id: "2", title: "Blink Twice", image: "https://picsum.photos/200/200?random=2" },
 ];
-
 const recent = [
   { id: "3", title: "God’s Menu", subtitle: "Stray Kids", image: "https://picsum.photos/200/200?random=89" },
   { id: "4", title: "Black Magic", subtitle: "Little Mix", image: "https://picsum.photos/200/200?random=60" },
   { id: "5", title: "The One That Got Away", subtitle: "Katy Perry", image: "https://picsum.photos/200/200?random=68" },
 ];
-
 const madeForYou = [
   { id: "6", title: "On Repeat", subtitle: "Songs you can’t get enough of", image: "https://picsum.photos/200/200?random=80" },
   { id: "7", title: "Your Discover Weekly", subtitle: "Your weekly mixtape", image: "https://picsum.photos/200/200?random=92" },
 ];
-
 const popular = [
   { id: "8", title: "Feelin' Good", image: "https://picsum.photos/200/200?random=103" },
   { id: "9", title: "Oldies", image: "https://picsum.photos/200/200?random=141" },
@@ -38,8 +34,10 @@ const popular = [
 
 export default function PlaylistsScreen() {
   const navigation = useNavigation();
+  const { colors } = useTheme();
+  const { accentColor } = useSelector((state: any) => state.theme);
+
   const [playlists, setPlaylists] = useState<{ id: string; name: string; image: string }[]>([]);
-  const [newPlaylist, setNewPlaylist] = useState("");
 
   useEffect(() => {
     const loadPlaylists = async () => {
@@ -53,50 +51,39 @@ export default function PlaylistsScreen() {
     AsyncStorage.setItem("playlists", JSON.stringify(playlists));
   }, [playlists]);
 
-  const addPlaylist = () => {
-    if (!newPlaylist.trim()) return;
+  const addPlaylist = (name: string) => {
+    if (!name.trim()) return;
     const newItem = {
       id: Date.now().toString(),
-      name: newPlaylist,
+      name,
       image: `https://picsum.photos/200/200?random=${Math.floor(Math.random() * 1000)}`,
     };
     setPlaylists([...playlists, newItem]);
-    setNewPlaylist("");
   };
 
   const removePlaylist = (id: string) => {
     setPlaylists(playlists.filter((p) => p.id !== id));
   };
 
-  const renderRightActions = (id: string) => (
-    <TouchableOpacity style={styles.deleteButton} onPress={() => removePlaylist(id)}>
-      <FontAwesome name="trash" size={20} color="#fff" />
-      <Text style={styles.deleteText}>Delete</Text>
-    </TouchableOpacity>
-  );
-
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-          <FontAwesome name="bars" size={20} color="#1DB954" />
+          <FontAwesome name="bars" size={20} color={accentColor} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Good morning</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Good morning</Text>
       </View>
 
-      {/* Good Morning Section */}
       <View style={styles.grid}>
         {goodMorning.map((item) => (
-          <TouchableOpacity key={item.id} style={styles.gridItem}>
+          <TouchableOpacity key={item.id} style={[styles.gridItem, { backgroundColor: colors.card }]}>
             <Image source={{ uri: item.image }} style={styles.gridImage} />
-            <Text style={styles.gridText}>{item.title}</Text>
+            <Text style={[styles.gridText, { color: colors.text }]}>{item.title}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Recent Section */}
-      <Text style={styles.sectionTitle}>Your recent rotation</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>Your recent rotation</Text>
       <FlatList
         data={recent}
         keyExtractor={(item) => item.id}
@@ -104,133 +91,67 @@ export default function PlaylistsScreen() {
           <View style={styles.listItem}>
             <Image source={{ uri: item.image }} style={styles.listImage} />
             <View style={styles.listTextContainer}>
-              <Text style={styles.listTitle}>{item.title}</Text>
-              <Text style={styles.listSubtitle}>{item.subtitle}</Text>
+              <Text style={[styles.listTitle, { color: colors.text }]}>{item.title}</Text>
+              <Text style={[styles.listSubtitle, { color: colors.border }]}>{item.subtitle}</Text>
             </View>
             <TouchableOpacity>
-              <FontAwesome name="ellipsis-v" size={18} color="#aaa" />
+              <FontAwesome name="ellipsis-v" size={18} color={colors.border} />
             </TouchableOpacity>
           </View>
         )}
         scrollEnabled={false}
       />
 
-      {/* Made For You Section */}
-      <Text style={styles.sectionTitle}>Made For You</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>Made For You</Text>
       <FlatList
         horizontal
         data={madeForYou}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: colors.card }]}>
             <Image source={{ uri: item.image }} style={styles.cardImage} />
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
+            <Text style={[styles.cardSubtitle, { color: colors.border }]}>{item.subtitle}</Text>
           </View>
         )}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingRight: 20 }}
       />
 
-      {/* Popular Section */}
-      <Text style={styles.sectionTitle}>Popular playlists</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>Popular playlists</Text>
       <FlatList
         horizontal
         data={popular}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: colors.card }]}>
             <Image source={{ uri: item.image }} style={styles.cardImage} />
-            <Text style={styles.cardTitle}>{item.title}</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
           </View>
         )}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingRight: 20 }}
       />
-
-
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#121212", paddingHorizontal: 15, paddingTop: 20 },
-  sectionTitle: { color: "#fff", fontSize: 22, fontWeight: "bold", marginBottom: 15, marginTop: 10 },
-
-  // Header
+  container: { flex: 1, paddingHorizontal: 15, paddingTop: 20 },
+  sectionTitle: { fontSize: 22, fontWeight: "bold", marginBottom: 15, marginTop: 10 },
   headerRow: { flexDirection: "row", alignItems: "center", marginBottom: 20 },
-  headerTitle: { color: "#fff", fontSize: 22, fontWeight: "bold", marginLeft: 10 },
-
-  // Good morning grid
+  headerTitle: { fontSize: 22, fontWeight: "bold", marginLeft: 10 },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  gridItem: {
-    backgroundColor: "#282828",
-    width: "48%",
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-    borderRadius: 6,
-    overflow: "hidden",
-    paddingRight: 10,
-  },
+  gridItem: { width: "48%", flexDirection: "row", alignItems: "center", marginBottom: 10, borderRadius: 6, overflow: "hidden", paddingRight: 10 },
   gridImage: { width: 50, height: 50 },
-  gridText: { color: "#fff", marginLeft: 10, flexShrink: 1 },
-
-  // Horizontal card style (Made for you, Popular)
-  card: { marginRight: 15, width: 140 },
+  gridText: { marginLeft: 10, flexShrink: 1 },
+  card: { marginRight: 15, width: 140, borderRadius: 6, padding: 5 },
   cardImage: { width: "100%", height: 140, borderRadius: 6, marginBottom: 8 },
-  cardTitle: { color: "#fff", fontWeight: "600", fontSize: 14 },
-  cardSubtitle: { color: "#aaa", fontSize: 12 },
-
-  // Recent vertical list
-  listItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  listImage: {
-    width: 55,
-    height: 55,
-    borderRadius: 6,
-    marginRight: 15,
-  },
-  listTextContainer: {
-    flex: 1,
-  },
-  listTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  listSubtitle: {
-    fontSize: 14,
-    color: "#aaa",
-  },
-
-  // Playlist management
-  playlistInputRow: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
-  input: { flex: 1, backgroundColor: "#282828", color: "#fff", padding: 10, borderRadius: 6, marginRight: 10 },
-  addButton: { backgroundColor: "#1DB954", padding: 10, borderRadius: 6 },
-  addButtonText: { color: "#fff", fontWeight: "bold" },
-
-  playlistCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#282828",
-    padding: 10,
-    borderRadius: 6,
-    marginBottom: 10,
-  },
-  playlistImage: { width: 50, height: 50, borderRadius: 6, marginRight: 10 },
-  playlistName: { color: "#fff", fontSize: 16 },
-
-  deleteButton: {
-    backgroundColor: "red",
-    justifyContent: "center",
-    alignItems: "center",
-    width: 80,
-    borderRadius: 6,
-    marginBottom: 10,
-  },
-  deleteText: { color: "#fff", fontWeight: "bold", marginTop: 5 },
+  cardTitle: { fontWeight: "600", fontSize: 14 },
+  cardSubtitle: { fontSize: 12 },
+  listItem: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
+  listImage: { width: 55, height: 55, borderRadius: 6, marginRight: 15 },
+  listTextContainer: { flex: 1 },
+  listTitle: { fontSize: 16, fontWeight: "600" },
+  listSubtitle: { fontSize: 14 },
 });

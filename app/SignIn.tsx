@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Redirect, router } from "expo-router";
 
+
 import {
   StyleSheet,
   Text,
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1DB954",
     borderRadius: 25,
     paddingVertical: 14,
-    paddingHorizontal: 150,
+    paddingHorizontal: 120,
     marginBottom: 20,
   },
   signInText: {

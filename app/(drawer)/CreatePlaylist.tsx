@@ -9,35 +9,18 @@ import {
   TouchableOpacity,
   TextInput,
 } from "react-native";
-import { useNavigation, DrawerActions } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Swipeable } from "react-native-gesture-handler";
-
-const goodMorning = [
-  { id: "1", title: "Today's Top Hits", image: "https://picsum.photos/200/200?random=1" },
-  { id: "2", title: "Dope Labs", image: "https://picsum.photos/200/200?random=2" },
-];
-
-const recent = [
-  { id: "3", title: "God’s Menu", subtitle: "Stray Kids", image: "https://picsum.photos/200/200?random=5" },
-  { id: "4", title: "Black Magic", subtitle: "Little Mix", image: "https://picsum.photos/200/200?random=6" },
-  { id: "5", title: "The One That Got Away", subtitle: "Katy Perry", image: "https://picsum.photos/200/200?random=7" },
-];
-
-const madeForYou = [
-  { id: "6", title: "On Repeat", subtitle: "Songs you can’t get enough of", image: "https://picsum.photos/200/200?random=8" },
-  { id: "7", title: "Your Discover Weekly", subtitle: "Your weekly mixtape", image: "https://picsum.photos/200/200?random=9" },
-];
-
-const popular = [
-  { id: "8", title: "Feelin' Good", image: "https://picsum.photos/200/200?random=10" },
-  { id: "9", title: "Pumped Pop", image: "https://picsum.photos/200/200?random=11" },
-  { id: "10", title: "Chill Mix", image: "https://picsum.photos/200/200?random=12" },
-];
+import { useTheme } from "@react-navigation/native"; // ✅ import theme
+import { useSelector } from "react-redux";
 
 export default function PlaylistsScreen() {
   const navigation = useNavigation();
+  const { colors } = useTheme(); // ✅ get colors from theme
+  const { accentColor } = useSelector((state: any) => state.theme);
+
   const [playlists, setPlaylists] = useState<{ id: string; name: string; image: string }[]>([]);
   const [newPlaylist, setNewPlaylist] = useState("");
 
@@ -69,27 +52,26 @@ export default function PlaylistsScreen() {
   };
 
   const renderRightActions = (id: string) => (
-    <TouchableOpacity style={styles.deleteButton} onPress={() => removePlaylist(id)}>
+    <TouchableOpacity style={[styles.deleteButton, { backgroundColor: colors.notification }]} onPress={() => removePlaylist(id)}>
       <FontAwesome name="trash" size={20} color="#fff" />
       <Text style={styles.deleteText}>Delete</Text>
     </TouchableOpacity>
   );
 
   return (
-    <ScrollView style={styles.container}>
-
-
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Your Playlists Section */}
-      <Text style={styles.sectionTitle}>Your Playlists</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Playlists</Text>
+
       <View style={styles.playlistInputRow}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.card, color: colors.text }]}
           placeholder="New playlist name"
           placeholderTextColor="#888"
           value={newPlaylist}
           onChangeText={setNewPlaylist}
         />
-        <TouchableOpacity style={styles.addButton} onPress={addPlaylist}>
+        <TouchableOpacity style={[styles.addButton, { backgroundColor: accentColor }]} onPress={addPlaylist}>
           <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
       </View>
@@ -101,7 +83,7 @@ export default function PlaylistsScreen() {
           overshootRight={false}
         >
           <TouchableOpacity
-            style={styles.playlistCard}
+            style={[styles.playlistCard, { backgroundColor: colors.card }]}
             onPress={() =>
               navigation.navigate(
                 "PlaylistDetail" as never,
@@ -110,7 +92,7 @@ export default function PlaylistsScreen() {
             }
           >
             <Image source={{ uri: playlist.image }} style={styles.playlistImage} />
-            <Text style={styles.playlistName}>{playlist.name}</Text>
+            <Text style={[styles.playlistName, { color: colors.text }]}>{playlist.name}</Text>
           </TouchableOpacity>
         </Swipeable>
       ))}
@@ -119,83 +101,18 @@ export default function PlaylistsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#121212", paddingHorizontal: 15, paddingTop: 20 },
-  sectionTitle: { color: "#fff", fontSize: 22, fontWeight: "bold", marginBottom: 15, marginTop: 10 },
+  container: { flex: 1, paddingHorizontal: 15, paddingTop: 20 },
+  sectionTitle: { fontSize: 22, fontWeight: "bold", marginBottom: 15, marginTop: 10 },
 
-  // Header
-  headerRow: { flexDirection: "row", alignItems: "center", marginBottom: 20 },
-  headerTitle: { color: "#fff", fontSize: 22, fontWeight: "bold", marginLeft: 10 },
-
-  // Good morning grid
-  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  gridItem: {
-    backgroundColor: "#282828",
-    width: "48%",
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-    borderRadius: 6,
-    overflow: "hidden",
-    paddingRight: 10,
-  },
-  gridImage: { width: 50, height: 50 },
-  gridText: { color: "#fff", marginLeft: 10, flexShrink: 1 },
-
-  // Horizontal card style (Made for you, Popular)
-  card: { marginRight: 15, width: 140 },
-  cardImage: { width: "100%", height: 140, borderRadius: 6, marginBottom: 8 },
-  cardTitle: { color: "#fff", fontWeight: "600", fontSize: 14 },
-  cardSubtitle: { color: "#aaa", fontSize: 12 },
-
-  // Recent vertical list
-  listItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  listImage: {
-    width: 55,
-    height: 55,
-    borderRadius: 6,
-    marginRight: 15,
-  },
-  listTextContainer: {
-    flex: 1,
-  },
-  listTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  listSubtitle: {
-    fontSize: 14,
-    color: "#aaa",
-  },
-
-  // Playlist management
   playlistInputRow: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
-  input: { flex: 1, backgroundColor: "#282828", color: "#fff", padding: 10, borderRadius: 6, marginRight: 10 },
-  addButton: { backgroundColor: "#1DB954", padding: 10, borderRadius: 6 },
+  input: { flex: 1, padding: 10, borderRadius: 6, marginRight: 10 },
+  addButton: { padding: 10, borderRadius: 6 },
   addButtonText: { color: "#fff", fontWeight: "bold" },
 
-  playlistCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#282828",
-    padding: 10,
-    borderRadius: 6,
-    marginBottom: 10,
-  },
+  playlistCard: { flexDirection: "row", alignItems: "center", padding: 10, borderRadius: 6, marginBottom: 10 },
   playlistImage: { width: 50, height: 50, borderRadius: 6, marginRight: 10 },
-  playlistName: { color: "#fff", fontSize: 16 },
+  playlistName: { fontSize: 16 },
 
-  deleteButton: {
-    backgroundColor: "red",
-    justifyContent: "center",
-    alignItems: "center",
-    width: 80,
-    borderRadius: 6,
-    marginBottom: 10,
-  },
+  deleteButton: { justifyContent: "center", alignItems: "center", width: 80, borderRadius: 6, marginBottom: 10 },
   deleteText: { color: "#fff", fontWeight: "bold", marginTop: 5 },
 });
