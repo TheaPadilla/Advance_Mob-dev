@@ -28,8 +28,17 @@ const themeSlice = createSlice({
         state.customColors.push(action.payload);
       }
     },
+    removeCustomColor(state, action: PayloadAction<string>) {
+      state.customColors = state.customColors.filter(
+        (color) => color !== action.payload
+      );
+      // Reset accent color if deleted
+      if (state.accentColor === action.payload) {
+        state.accentColor = state.customColors[0] || "#1DB954";
+      }
+    },
   },
 });
 
-export const { setTheme, setAccentColor, addCustomColor } = themeSlice.actions;
+export const { setTheme, setAccentColor, addCustomColor, removeCustomColor } = themeSlice.actions;
 export default themeSlice.reducer;
