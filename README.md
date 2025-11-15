@@ -11,8 +11,5 @@
 # WEEK 5
 I added light, dark, and custom themes to the app using Redux and redux-persist. I can pick a theme or choose a custom accent color using a color wheel, and I also have the option to delete any custom color I added. The selected theme and accent color are saved so they persist even after closing the app, and all screens update automatically to match the theme I chose.
 
-<img src="screenshots/dark.png" alt="Logo" width="200"/>
-<img src="screenshots/light.png" alt="Logo" width="200"/>
-<img src="screenshots/custom.png" alt="Logo" width="200"/>
-<img src="screenshots/custom2.png" alt="Logo" width="200" />
-<img src="screenshots/delete.png" alt="Logo" width="200" />
+<img src="screenshots/dark.png" alt="Logo" width="200"/><img src="screenshots/light.png" alt="Logo" width="200"/><img src="screenshots/custom.png" alt="Logo" width="200"/>
+<img src="screenshots/custom2.png" alt="Logo" width="200" /><img src="screenshots/delete.png" alt="Logo" width="200" />
